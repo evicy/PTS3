@@ -20,6 +20,7 @@ async def complete_neighbourhood(start, HOST="localhost", requester=Requester())
    print("complete_neighbourhood, start node = ", start)
    neighbours = await requester.get_list_of_neighbours(start, HOST)
 
+   print(neighbours)
    neighbours.append(start)
    print(neighbours)
 
@@ -27,10 +28,11 @@ async def complete_neighbourhood(start, HOST="localhost", requester=Requester())
    for x in neighbours:
        for y in neighbours:
           if x != y:
+               #print("Adding task: add edge from ", x, "  to", y)
                tasks.append(asyncio.create_task(requester.add_edge(x,y, HOST)))
 
    await asyncio.gather(*tasks)
-   print("complete_neighbourhood ready")
+   print("complete_neighbourhood ready \n")
 
 
 async def climb_degree(start, HOST="localhost", requester=Requester()):
@@ -38,7 +40,7 @@ async def climb_degree(start, HOST="localhost", requester=Requester()):
     neighbours = await requester.get_list_of_neighbours(start, HOST)
     max_degree = len(neighbours)
     if max_degree == 0:
-        print("result is ", start)
+        print("climb_degree ready, local maximum is ", start, "\n")
         return start
 
     port_with_max_degree = start
@@ -58,15 +60,15 @@ async def climb_degree(start, HOST="localhost", requester=Requester()):
 
     if start != port_with_max_degree:
         return await climb_degree(port_with_max_degree)
-    print("result is ", port_with_max_degree)
+    print("climb_degree ready, local maximum is ", port_with_max_degree, "\n")
     return port_with_max_degree
 
 
 async def distance4(start, HOST="localhost", requester=Requester()):
+    print("distance4, start node = ", start)
     actual_nodes = set()
     actual_nodes.add(start)
     visited_nodes = set()
-    visited_nodes.add(start)
 
     for i in range(4):
         visited_nodes.update(actual_nodes)
@@ -83,4 +85,5 @@ async def distance4(start, HOST="localhost", requester=Requester()):
                 new_neighbours.remove(n)
         actual_nodes = new_neighbours
 
+    print("distance4 ready\n")
     return actual_nodes
