@@ -38,6 +38,7 @@ async def climb_degree(start, HOST="localhost", requester=Requester()):
     neighbours = await requester.get_list_of_neighbours(start, HOST)
     max_degree = len(neighbours)
     if max_degree == 0:
+        print("result is ", start)
         return start
 
     port_with_max_degree = start
@@ -57,7 +58,7 @@ async def climb_degree(start, HOST="localhost", requester=Requester()):
 
     if start != port_with_max_degree:
         return await climb_degree(port_with_max_degree)
-
+    print("result is ", port_with_max_degree)
     return port_with_max_degree
 
 
