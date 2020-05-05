@@ -29,11 +29,11 @@ async def do_stuff(HOST, nodes, edges, condition_ready=None, condition_done=None
         #distance4(8030, result, visited)
         #print(result.difference(visited))
 
-        #x = await complete_neighbourhood(8030)
-        #print(x)
+        x = await complete_neighbourhood(8030)
+        print(x)
 
-        #max_port = await climb_degree(8030)
-        #print(max_port)
+        max_port = await climb_degree(8030)
+        print(max_port)
 
         result = await distance4(8030)
         print(result)

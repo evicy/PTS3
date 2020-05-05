@@ -1,25 +1,24 @@
 import requests
 import asyncio
 
+class Requester:
+    async def get_list_of_neighbours(self, start,  HOST="localhost"):
+        try:
+            r = requests.get(f'http://{HOST}:{start}/')
+            neighbours = r.text.split(',')
+            neighbours = list(map(int, neighbours))
+            return neighbours
+        except:
+            return []
 
-HOST = "localhost"
+    async def add_edge(self, e_from, e_to, HOST="localhost"):
+       r = requests.get(f'http://{HOST}:{e_from}/new?port={e_to}')
+       print("adding edge from ", e_from, "  to ", e_to)
 
-async def get_list_of_neighbours(start,  HOST = "localhost"):
-    try:
-        r = requests.get(f'http://{HOST}:{start}/')
-        neighbours = r.text.split(',')
-        neighbours = list(map(int, neighbours))
-        return neighbours
-    except:
-        return []
 
-async def add_edge(e_from, e_to):
-   r = requests.get(f'http://{HOST}:{e_from}/new?port={e_to}')
-   print("adding edge from ", e_from, "  to ", e_to)
-
-async def complete_neighbourhood(start,  HOST = "localhost"):
+async def complete_neighbourhood(start, HOST="localhost", requester=Requester()):
    print("complete_neighbourhood, start node = ", start)
-   neighbours = await get_list_of_neighbours(start, HOST)
+   neighbours = await requester.get_list_of_neighbours(start, HOST)
 
    neighbours.append(start)
    print(neighbours)
@@ -28,15 +27,15 @@ async def complete_neighbourhood(start,  HOST = "localhost"):
    for x in neighbours:
        for y in neighbours:
           if x != y:
-               tasks.append(asyncio.create_task(add_edge(x,y)))
+               tasks.append(asyncio.create_task(requester.add_edge(x,y, HOST)))
 
    await asyncio.gather(*tasks)
    print("complete_neighbourhood ready")
 
 
-async def climb_degree(start, HOST="localhost"):
+async def climb_degree(start, HOST="localhost", requester=Requester()):
     print("climb_degree, start node = ", start)
-    neighbours = await get_list_of_neighbours(start, HOST)
+    neighbours = await requester.get_list_of_neighbours(start, HOST)
     max_degree = len(neighbours)
     if max_degree == 0:
         return start
@@ -44,7 +43,7 @@ async def climb_degree(start, HOST="localhost"):
     port_with_max_degree = start
 
     async def get_degrees(node):
-        node_neighbours = await get_list_of_neighbours(node, HOST)
+        node_neighbours = await requester.get_list_of_neighbours(node, HOST)
         return len(node_neighbours)
 
     tasks = [asyncio.create_task(get_degrees(node)) for node in neighbours]
@@ -62,7 +61,7 @@ async def climb_degree(start, HOST="localhost"):
     return port_with_max_degree
 
 
-async def distance4(start):
+async def distance4(start, HOST="localhost", requester=Requester()):
     actual_nodes = set()
     actual_nodes.add(start)
     visited_nodes = set()
@@ -71,7 +70,7 @@ async def distance4(start):
     for i in range(4):
         visited_nodes.update(actual_nodes)
 
-        tasks = [asyncio.create_task(get_list_of_neighbours(node)) for node in actual_nodes]
+        tasks = [asyncio.create_task(requester.get_list_of_neighbours(node, HOST)) for node in actual_nodes]
         tasks_results = await asyncio.gather(*tasks)
 
         new_neighbours = set()
