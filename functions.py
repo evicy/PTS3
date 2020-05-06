@@ -3,6 +3,7 @@ import asyncio
 
 class Requester:
     async def get_list_of_neighbours(self, start,  HOST="localhost"):
+        print("get_list_of_neighbours")
         try:
             r = requests.get(f'http://{HOST}:{start}/')
             neighbours = r.text.split(',')
@@ -13,7 +14,7 @@ class Requester:
 
     async def add_edge(self, e_from, e_to, HOST="localhost"):
        r = requests.get(f'http://{HOST}:{e_from}/new?port={e_to}')
-       print("adding edge from ", e_from, "  to ", e_to)
+       #print("adding edge from ", e_from, "  to ", e_to)
 
 
 async def complete_neighbourhood(start, HOST="localhost", requester=Requester()):
@@ -51,7 +52,7 @@ async def climb_degree(start, HOST="localhost", requester=Requester()):
 
     tasks = [asyncio.create_task(get_degrees(node)) for node in neighbours]
     tasks_results = await asyncio.gather(*tasks)
-    print("tasks_result = ", tasks_results)
+    #print("tasks_result = ", tasks_results)
 
     for i in range(len(tasks_results)):
         if (tasks_results[i] > max_degree) or (tasks_results[i] == max_degree and port_with_max_degree > neighbours[i]):
@@ -59,7 +60,7 @@ async def climb_degree(start, HOST="localhost", requester=Requester()):
             port_with_max_degree = neighbours[i]
 
     if start != port_with_max_degree:
-        return await climb_degree(port_with_max_degree)
+        return await climb_degree(port_with_max_degree, HOST=HOST, requester=requester)
     print("climb_degree ready, local maximum is ", port_with_max_degree, "\n")
     return port_with_max_degree
 

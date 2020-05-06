@@ -1,35 +1,42 @@
-import unittest
-from functions import *
+import asynctest
 from initialize_nodes import *
 import asyncio
-from asyncio import events
+import threading
+from functions import *
+import responses
 
 
-class SystemTest(unittest.TestCase):
+
+class SystemTest(asynctest.TestCase):
     def setUp(self):
-        HOST = "localhost"
+        self.HOST = "localhost"
         graph_base = 8030
-        graph = {(0, 1), (1, 2), (1, 3), (1, 4), (3, 4), (4, 5)}
-        graph = {(graph_base + x, graph_base + y) for x, y in graph}
-        nodes = {x for y in graph for x in y}
+        self.graph = {(0,1), (0,2), (2,3), (2,4), (2,7), (4,5), (3,7), (7,8)}
+        self.graph = {(graph_base + x, graph_base + y) for x, y in self.graph}
+        self.nodes = {x for y in self.graph for x in y}
 
-        self.condition_ready = asyncio.Condition()
-        self.condition_done = asyncio.Condition()
+        self.condition_ready = threading.Condition()
+        self.condition_done = threading.Condition()
 
-        loop = asyncio.get_event_loop()
-        task = loop.create_task(do_stuff(HOST, nodes, graph, self.condition_ready, self.condition_done))
+        self.main_thread = threading.Thread(target=do_stuff,
+                    args=[self.HOST, self.nodes, self.graph, self.condition_ready, self.condition_done])
+        self.main_thread.start()
 
-    def test_complete_neighbourhood(self):
-        async def complete_neighbourhood_wrapper():
-            async with self.condition_ready:
-                await self.condition_ready.wait()
-                await complete_neighbourhood(8030)
-                self.condition_done.notify()
-        loop = asyncio.get_event_loop()
-        task = loop.create_task(complete_neighbourhood_wrapper())
-        loop.run_forever()
+    async def test_functions(self):
+        with self.condition_ready:
+            self.condition_ready.wait()
+
+        self.assertEqual(await climb_degree(8035, HOST=self.HOST), 8032)
+        self.assertEqual(await distance4(8035, HOST=self.HOST), {8031, 8038})
+        await complete_neighbourhood(8030, HOST=self.HOST)
+        self.assertEqual(await distance4(8035, HOST=self.HOST), {8038})
+
+        with self.condition_done:
+            self.condition_done.notify()
+
+        self.main_thread.join()
         print("END\n")
 
 
 if __name__ == '__main__':
-    unittest.main()
+    asynctest.main()

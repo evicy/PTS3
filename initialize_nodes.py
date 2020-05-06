@@ -3,11 +3,10 @@ from node import get_handler
 from threading import Thread
 import time
 import requests
-import asyncio
 
 
 # The condition argument is for you to know when everithing is running
-async def do_stuff(HOST, nodes, edges, condition_ready=None, condition_done=None):
+def do_stuff(HOST, nodes, edges, condition_ready=None, condition_done=None):
     servers = list(HTTPServer((HOST, port), get_handler()) for port in nodes)
 
     try:
@@ -43,13 +42,11 @@ async def do_stuff(HOST, nodes, edges, condition_ready=None, condition_done=None
     for t in threads: t.join()
 
 
-async def main():
+if __name__ == "__main__":
     HOST = "localhost"
     graph_base = 8030
     graph = {(0, 1), (1, 2), (1, 3), (1, 4), (3, 4), (4, 5)}
     graph = {(graph_base + x, graph_base + y) for x, y in graph}
     nodes = {x for y in graph for x in y}
-    await do_stuff(HOST, nodes, graph)
+    do_stuff(HOST, nodes, graph)
 
-if __name__ == "__main__":
-    asyncio.run(main())
