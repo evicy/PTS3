@@ -1,11 +1,7 @@
 import asynctest
 from initialize_nodes import *
-import asyncio
 import threading
 from functions import *
-import responses
-
-
 
 class SystemTest(asynctest.TestCase):
     def setUp(self):
@@ -22,6 +18,7 @@ class SystemTest(asynctest.TestCase):
                     args=[self.HOST, self.nodes, self.graph, self.condition_ready, self.condition_done])
         self.main_thread.start()
 
+
     async def test_functions(self):
         with self.condition_ready:
             self.condition_ready.wait()
@@ -29,7 +26,17 @@ class SystemTest(asynctest.TestCase):
         self.assertEqual(await climb_degree(8035, HOST=self.HOST), 8032)
         self.assertEqual(await distance4(8035, HOST=self.HOST), {8031, 8038})
         await complete_neighbourhood(8030, HOST=self.HOST)
-        self.assertEqual(await distance4(8035, HOST=self.HOST), {8038})
+
+        #skontrolujeme, ci sedia hrany pomocou get_list_of_neighbours coroutiny
+        requester = Requester()
+        tasks = [asyncio.create_task(requester.get_list_of_neighbours(node, HOST=self.HOST))
+                 for node in [8030, 8031, 8032, 8033, 8034, 8035, 8037, 8038]]
+        tasks_results = await asyncio.gather(*tasks)
+        for l in tasks_results:
+            sorted(l)
+        self.assertEqual(tasks_results,
+                [[8031, 8032], [8030, 8032], [8030, 8034, 8031, 8037, 8033],
+                [8037, 8032], [8035, 8032], [8034], [8038, 8033, 8032], [8037]])
 
         with self.condition_done:
             self.condition_done.notify()
