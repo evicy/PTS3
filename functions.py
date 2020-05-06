@@ -3,7 +3,7 @@ import asyncio
 
 class Requester:
     async def get_list_of_neighbours(self, start,  HOST="localhost"):
-        print("get_list_of_neighbours")
+        #print("get_list_of_neighbours")
         try:
             r = requests.get(f'http://{HOST}:{start}/')
             neighbours = r.text.split(',')
@@ -21,15 +21,12 @@ async def complete_neighbourhood(start, HOST="localhost", requester=Requester())
    print("complete_neighbourhood, start node = ", start)
    neighbours = await requester.get_list_of_neighbours(start, HOST)
 
-   print(neighbours)
    neighbours.append(start)
-   print(neighbours)
 
    tasks = []
    for x in neighbours:
        for y in neighbours:
           if x != y:
-               #print("Adding task: add edge from ", x, "  to", y)
                tasks.append(asyncio.create_task(requester.add_edge(x,y, HOST)))
 
    await asyncio.gather(*tasks)
@@ -52,7 +49,6 @@ async def climb_degree(start, HOST="localhost", requester=Requester()):
 
     tasks = [asyncio.create_task(get_degrees(node)) for node in neighbours]
     tasks_results = await asyncio.gather(*tasks)
-    #print("tasks_result = ", tasks_results)
 
     for i in range(len(tasks_results)):
         if (tasks_results[i] > max_degree) or (tasks_results[i] == max_degree and port_with_max_degree > neighbours[i]):

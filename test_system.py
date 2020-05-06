@@ -32,11 +32,12 @@ class SystemTest(asynctest.TestCase):
         tasks = [asyncio.create_task(requester.get_list_of_neighbours(node, HOST=self.HOST))
                  for node in [8030, 8031, 8032, 8033, 8034, 8035, 8037, 8038]]
         tasks_results = await asyncio.gather(*tasks)
-        for l in tasks_results:
-            sorted(l)
-        self.assertEqual(tasks_results,
-                [[8031, 8032], [8030, 8032], [8030, 8034, 8031, 8037, 8033],
-                [8037, 8032], [8035, 8032], [8034], [8038, 8033, 8032], [8037]])
+
+        expected_neighbours = [[8031, 8032], [8030, 8032], [8030, 8031, 8033, 8034, 8037],
+                               [8032, 8037], [8032, 8035], [8034], [8032, 8033, 8038], [8037]]
+
+        for i in range(len(expected_neighbours)):
+            self.assertEqual(sorted(tasks_results[i]), expected_neighbours[i])
 
         with self.condition_done:
             self.condition_done.notify()
