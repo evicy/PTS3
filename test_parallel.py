@@ -35,7 +35,7 @@ class TestFunctions(unittest.TestCase):
         start_time = time.time()
         self.assertEqual(asyncio.run(climb_degree(8030, requester=self.mock_requester)), 8031)
         print("test_climb_degree: -- %s seconds --" % (time.time() - start_time), " expected around 20 seconds\n")
-        self.assertTrue(20 <= (time.time() - start_time) < 30)
+        self.assertTrue(19 <= (time.time() - start_time) < 21)
 
 
     # mock_neighbours called 6 times = 30 seconds
@@ -45,7 +45,7 @@ class TestFunctions(unittest.TestCase):
         start_time = time.time()
         self.assertEqual(asyncio.run(distance4(8030, requester=self.mock_requester)), {8036, 8037})
         print("test_distance4: -- %s seconds --" % (time.time() - start_time), " expected around: 20 seconds\n")
-        self.assertTrue(20 <= (time.time() - start_time) < 30)
+        self.assertTrue(19 <= (time.time() - start_time) < 21)
 
 
     # mock_neighbours called once, mock_add_edge called 4times = 25sec sequentially
@@ -57,7 +57,7 @@ class TestFunctions(unittest.TestCase):
         loop.run_until_complete(complete_neighbourhood(8034, requester=self.mock_requester))
         loop.close()
         print("test_complete_neighbourhood: -- %s seconds --AA" % (time.time() - start_time), " expected around 10 seconds\n")
-        self.assertTrue(10.0 <= (time.time() - start_time) < 25.0)
+        self.assertTrue(9 <= (time.time() - start_time) < 11)
         self.assertEqual(sorted(self.node_neighbours[8034]), [8036, 8037])
         self.assertEqual(sorted(self.node_neighbours[8036]), [8034, 8037])
         self.assertEqual(sorted(self.node_neighbours[8037]), [8034, 8036])
